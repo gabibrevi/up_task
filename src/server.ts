@@ -9,7 +9,10 @@ connectDB()
 
 const app = express()
 
-//ADDING ROUTES
+//TO READ JSON ON BODY HTTP REQUEST
+app.use(express.json())
+
+//ADDING ROUTE
 app.use('/api/projects', projectRoutes)
 
 export default app
