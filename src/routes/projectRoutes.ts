@@ -2,9 +2,12 @@ import { Router } from 'express'
 import { body, param } from 'express-validator'
 import { ProjectController } from '../controllers/ProjectController'
 import { handleInputErrors } from '../middleware/validation'
+import { TaskController } from '../controllers/TaskController'
+import { validateProjectExist } from '../middleware/project'
 
 const router = Router()
 
+/* PROJECTS */
 router.post(
     '/',
     body('projectName').notEmpty().withMessage('Do not forget the project name!'),
@@ -36,5 +39,19 @@ router.delete(
     handleInputErrors,
     ProjectController.deleteProject
 )
+
+/* TASK */
+router.post(
+    '/:projectId/task',
+    validateProjectExist,
+    body('name').notEmpty().withMessage('Do not forget the task name!'),
+    body('description').notEmpty().withMessage('Do not forget the task description! '),
+    TaskController.createTask
+)
+
+router.get('/:projectId/tasks', TaskController.getAllTasks)
+router.get('/:projectId/taskId', TaskController.getTaskById)
+router.put('/:projectId/taskId', TaskController.updateTask)
+router.delete('/:projectId/taskId', TaskController.deleteTask)
 
 export default router

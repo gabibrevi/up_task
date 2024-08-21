@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import Project from '../models/Project'
 import colors from 'colors'
-import { promiseHooks } from 'v8'
 
 export class ProjectController {
     static createProject = async (req: Request, res: Response) => {
