@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import Project, { IProject } from '../models/Project'
 
-//Lets you add project into Request to use it on createTask - Controller
+//Lets you add project into Request to use it on Controllers
 declare global {
     namespace Express {
         interface Request {
@@ -10,7 +10,7 @@ declare global {
     }
 }
 
-export async function validateProjectExist(req: Request, res: Response, next: NextFunction) {
+export async function projectExist(req: Request, res: Response, next: NextFunction) {
     try {
         const { projectId } = req.params
 

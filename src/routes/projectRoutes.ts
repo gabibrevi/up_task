@@ -1,13 +1,15 @@
 import { Router } from 'express'
 import { body, param } from 'express-validator'
 import { ProjectController } from '../controllers/ProjectController'
-import { handleInputErrors } from '../middleware/validation'
 import { TaskController } from '../controllers/TaskController'
-import { validateProjectExist } from '../middleware/project'
+import { handleInputErrors } from '../middleware/validation'
+import { projectExist } from '../middleware/project'
+import { taskBelongToProject, taskExist } from '../middleware/tasks'
 
 const router = Router()
 
-/* PROJECTS */
+/************ PROJECTS ***************/
+
 router.post(
     '/',
     body('projectName').notEmpty().withMessage('Do not forget the project name!'),
@@ -17,6 +19,7 @@ router.post(
     ProjectController.createProject
 )
 router.get('/', ProjectController.getAllProject)
+
 router.get(
     '/:id',
     param('id').isMongoId().withMessage('ID not valid'),
@@ -40,18 +43,51 @@ router.delete(
     ProjectController.deleteProject
 )
 
-/* TASK */
+/************ TASKS ***************/
+
+//Middleware validations
+router.param('projectId', projectExist)
+router.param('taskId', taskExist)
+router.param('taskId', taskBelongToProject)
+
 router.post(
-    '/:projectId/task',
-    validateProjectExist,
+    '/:projectId/tasks',
     body('name').notEmpty().withMessage('Do not forget the task name!'),
     body('description').notEmpty().withMessage('Do not forget the task description! '),
+    handleInputErrors,
     TaskController.createTask
 )
 
-router.get('/:projectId/tasks', TaskController.getAllTasks)
-router.get('/:projectId/taskId', TaskController.getTaskById)
-router.put('/:projectId/taskId', TaskController.updateTask)
-router.delete('/:projectId/taskId', TaskController.deleteTask)
+router.get('/:projectId/tasks', TaskController.getProjectTasks)
+
+router.get(
+    '/:projectId/tasks/:taskId',
+    param('taskId').isMongoId().withMessage('Task ID not valid'),
+    handleInputErrors,
+    TaskController.getTaskById
+)
+
+router.put(
+    '/:projectId/tasks/:taskId',
+    param('taskId').isMongoId().withMessage('Task ID not valid'),
+    body('name').notEmpty().withMessage('Do not forget the task name!'),
+    body('description').notEmpty().withMessage('Do not forget the task description! '),
+    handleInputErrors,
+    TaskController.updateTask
+)
+router.delete(
+    '/:projectId/tasks/:taskId',
+    param('taskId').isMongoId().withMessage('Task ID not valid'),
+    handleInputErrors,
+    TaskController.deleteTask
+)
+
+router.post(
+    '/:projectId/tasks/:taskId/status',
+    param('taskId').isMongoId().withMessage('Task ID not valid'),
+    body('status').notEmpty().withMessage('Do not forget to asing status!'),
+    handleInputErrors,
+    TaskController.updateStatus
+)
 
 export default router
